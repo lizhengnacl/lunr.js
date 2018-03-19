@@ -1034,7 +1034,10 @@ lunr.Index.prototype.add = function (doc, emitEvent) {
       emitEvent = emitEvent === undefined ? true : emitEvent
 
   this._fields.forEach(function (field) {
-    var fieldTokens = this.pipeline.run(this.tokenizerFn(doc[field.name]))
+    // 删掉内部接口计算分词
+    // var fieldTokens = this.pipeline.run(this.tokenizerFn(doc[field.name]))
+    // 直接从文档词库加载，这里与上述的generate_search_index函数相呼应。_tokens
+    var fieldTokens = doc[field.name + '_tokens']
 
     docTokens[field.name] = fieldTokens
 
@@ -1827,7 +1830,8 @@ lunr.Pipeline.registerFunction(lunr.stopWordFilter, 'stopWordFilter')
  * @see lunr.Pipeline
  */
 lunr.trimmer = function (token) {
-  return token.replace(/^\W+/, '').replace(/\W+$/, '')
+    var result = token.replace(/^\s+/, '').replace(/\s+$/, '')  //  \W -> \s
+    return result === '' ? undefined : result
 }
 
 lunr.Pipeline.registerFunction(lunr.trimmer, 'trimmer')
